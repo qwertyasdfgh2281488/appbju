@@ -1,0 +1,115 @@
+import Foundation
+import Combine
+
+final class DiaryViewModel: ObservableObject {
+    
+    @Published var meals: [Food] = [
+        Food(name: "Куриная грудка", calories: 165, protein: 31, fat: 3.6, carbs: 0),
+        Food(name: "Рис", calories: 130, protein: 2.7, fat: 0.3, carbs: 28),
+        Food(name: "Яблоко", calories: 52, protein: 0.3, fat: 0.2, carbs: 14)
+    ]
+    
+    @Published var foodName = ""
+    @Published var calories = ""
+    @Published var protein = ""
+    @Published var fat = ""
+    @Published var carbs = ""
+    
+    var totalCalories: Int {
+        meals.reduce(0) { $0 + $1.calories }
+    }
+    
+    var totalProtein: Double {
+        meals.reduce(0) { $0 + $1.protein }
+    }
+    
+    var totalFat: Double {
+        meals.reduce(0) { $0 + $1.fat }
+    }
+    
+    var totalCarbs: Double {
+        meals.reduce(0) { $0 + $1.carbs }
+    }
+    
+    func addFood() {
+        
+        guard
+            !foodName.isEmpty,
+            let calories = Int(calories),
+            let protein = Double(protein),
+            let fat = Double(fat),
+            let carbs = Double(carbs)
+        else { return }
+        
+        meals.append(
+            Food(
+                name: foodName,
+                calories: calories,
+                protein: protein,
+                fat: fat,
+                carbs: carbs
+            )
+        )
+        
+        foodName = ""
+        self.calories = ""
+        self.protein = ""
+        self.fat = ""
+        self.carbs = ""
+    }
+    
+    func delete(at offsets: IndexSet) {
+        for index in offsets.sorted(by: >) {
+            meals.remove(at: index)
+        }
+    }
+}
+--------------------------
+import Foundation
+import Combine
+
+final class HomeViewModel: ObservableObject {
+
+    @Published var calories = 1450
+    @Published var targetCalories = 2200
+
+    @Published var protein = 95
+    @Published var targetProtein = 150
+
+    @Published var water = 1.8
+    @Published var targetWater = 2.5
+
+    var dailyScore: Int {
+
+        let caloriePart = min(Int(Double(calories) / Double(targetCalories) * 50), 50)
+        let proteinPart = min(Int(Double(protein) / Double(targetProtein) * 30), 30)
+        let waterPart = min(Int(water / targetWater * 20), 20)
+
+        return caloriePart + proteinPart + waterPart
+    }
+
+    var recommendation: String {
+
+        if protein < targetProtein {
+            return "Добавьте больше белка в рацион."
+        }
+
+        if water < targetWater {
+            return "Не забудьте выпить воды."
+        }
+
+        return "Отличная работа! Все цели на сегодня выполнены."
+    }
+
+    func addCalories() {
+        calories += 100
+    }
+
+    func addProtein() {
+        protein += 10
+    }
+
+    func addWater() {
+        water += 0.25
+    }
+}
