@@ -1,0 +1,45 @@
+import Foundation
+
+struct NutritionCalculator {
+
+    static func calculateBMR(weight: Double,
+                             height: Double,
+                             age: Int,
+                             isMale: Bool) -> Double {
+
+        if isMale {
+            return 10 * weight + 6.25 * height - 5 * Double(age) + 5
+        } else {
+            return 10 * weight + 6.25 * height - 5 * Double(age) - 161
+        }
+    }
+
+    static func calculateCalories(bmr: Double) -> Int {
+        Int(bmr * 1.4)
+    }
+
+}
+----------------------
+import Foundation
+
+struct RecommendationService {
+
+    static func recommendation(
+        protein: Int,
+        targetProtein: Int,
+        water: Double,
+        targetWater: Double
+    ) -> String {
+
+        if protein < targetProtein {
+            return "Добавьте продукты с высоким содержанием белка."
+        }
+
+        if water < targetWater {
+            return "Увеличьте потребление воды."
+        }
+
+        return "Сегодня все показатели находятся в норме."
+    }
+
+}
