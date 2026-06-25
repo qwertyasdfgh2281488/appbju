@@ -1,0 +1,568 @@
+import SwiftUI
+
+struct ContentView: View {
+
+    @StateObject private var homeViewModel = HomeViewModel()
+
+    var body: some View {
+
+        TabView {
+
+            NavigationStack {
+
+                HomeView(viewModel: homeViewModel)
+
+            }
+            .tabItem {
+
+                Label("Главная", systemImage: "house.fill")
+
+            }
+
+            NavigationStack {
+
+                DiaryView()
+
+            }
+            .tabItem {
+
+                Label("Дневник", systemImage: "fork.knife")
+
+            }
+
+            NavigationStack {
+
+                StatisticsView()
+
+            }
+            .tabItem {
+
+                Label("Статистика", systemImage: "chart.bar.fill")
+
+            }
+
+            NavigationStack {
+
+                ProfileView()
+
+            }
+            .tabItem {
+
+                Label("Профиль", systemImage: "person.fill")
+
+            }
+
+        }
+        .tint(.green)
+
+    }
+
+}
+
+#Preview {
+
+    ContentView()
+
+}
+---------------------------
+
+  import SwiftUI
+
+struct DiaryView: View {
+
+    @StateObject private var viewModel = DiaryViewModel()
+
+    var body: some View {
+
+        NavigationStack {
+
+            List {
+
+                Section("Добавить продукт") {
+
+                    TextField("Название", text: $viewModel.foodName)
+
+                    TextField("Калории", text: $viewModel.calories)
+                        .keyboardType(.numberPad)
+
+                    TextField("Белки", text: $viewModel.protein)
+                        .keyboardType(.decimalPad)
+
+                    TextField("Жиры", text: $viewModel.fat)
+                        .keyboardType(.decimalPad)
+
+                    TextField("Углеводы", text: $viewModel.carbs)
+                        .keyboardType(.decimalPad)
+
+                    Button {
+
+                        withAnimation {
+                            viewModel.addFood()
+                        }
+
+                    } label: {
+
+                        Label("Добавить продукт", systemImage: "plus.circle.fill")
+                            .frame(maxWidth: .infinity)
+
+                    }
+                    .buttonStyle(.borderedProminent)
+
+                }
+
+                Section("Дневник") {
+
+                    ForEach(viewModel.meals) { food in
+
+                        VStack(alignment: .leading, spacing: 8) {
+
+                            HStack {
+
+                                Text(food.name)
+                                    .font(.headline)
+
+                                Spacer()
+
+                                Text("\(food.calories) ккал")
+                                    .foregroundStyle(.orange)
+                                    .bold()
+
+                            }
+
+                            HStack(spacing: 18) {
+
+                                Label("\(String(format: "%.1f", food.protein)) Б", systemImage: "bolt.fill")
+                                    .foregroundStyle(.green)
+
+                                Label("\(String(format: "%.1f", food.fat)) Ж", systemImage: "drop.fill")
+                                    .foregroundStyle(.yellow)
+
+                                Label("\(String(format: "%.1f", food.carbs)) У", systemImage: "leaf.fill")
+                                    .foregroundStyle(.blue)
+
+                            }
+                            .font(.caption)
+
+                        }
+                        .padding(.vertical, 4)
+
+                    }
+                    .onDelete(perform: viewModel.delete)
+
+                }
+
+                Section("Итого за день") {
+
+                    HStack {
+
+                        Text("Калории")
+
+                        Spacer()
+
+                        Text("\(viewModel.totalCalories)")
+                            .bold()
+
+                    }
+
+                    HStack {
+
+                        Text("Белки")
+
+                        Spacer()
+
+                    Text("\(String(format: "%.1f", viewModel.totalProtein)) г")
+
+                    }
+
+                    HStack {
+
+                        Text("Жиры")
+
+                        Spacer()
+
+                        Text("\(String(format: "%.1f", viewModel.totalFat)) г")
+                    }
+
+                    HStack {
+
+                        Text("Углеводы")
+
+                        Spacer()
+
+                        Text("\(String(format: "%.1f", viewModel.totalCarbs)) г")
+
+                    }
+
+                }
+
+            }
+            .navigationTitle("Дневник питания")
+
+        }
+
+    }
+
+}
+
+#Preview {
+
+    DiaryView()
+
+}
+-------------------------
+    import SwiftUI
+
+struct HomeView: View {
+
+    @ObservedObject var viewModel: HomeViewModel
+
+    var body: some View {
+
+        ScrollView {
+
+            VStack(spacing: 25) {
+
+                VStack(alignment: .leading, spacing: 5) {
+
+                    Text("Добро пожаловать 👋")
+                        .font(.title2)
+                        .fontWeight(.medium)
+
+                    Text("NutriTrack")
+                        .font(.largeTitle)
+                        .fontWeight(.bold)
+
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+
+                CalorieRing(
+                    calories: viewModel.calories,
+                    target: viewModel.targetCalories
+                )
+
+                VStack(spacing: 15) {
+
+                    HStack {
+
+                        StatCard(
+                            title: "Белки",
+                            value: "\(viewModel.protein) г",
+                            icon: "bolt.fill",
+                            color: .green
+                        )
+
+                        StatCard(
+                            title: "Вода",
+                            value: String(format: "%.1f л", viewModel.water),
+                            icon: "drop.fill",
+                            color: .blue
+                        )
+
+                    }
+
+                    HStack {
+
+                        StatCard(
+                            title: "Калории",
+                            value: "\(viewModel.calories)",
+                            icon: "flame.fill",
+                            color: .orange
+                        )
+
+                        StatCard(
+                            title: "Рейтинг",
+                            value: "\(viewModel.dailyScore)",
+                            icon: "star.fill",
+                            color: .yellow
+                        )
+
+                    }
+
+                }
+
+                VStack(alignment: .leading, spacing: 15) {
+
+                    Text("Быстрые действия")
+                        .font(.headline)
+
+                    Button {
+
+                        withAnimation(.spring()) {
+                            viewModel.addCalories()
+                        }
+
+                    } label: {
+
+                        Label("+100 ккал", systemImage: "plus.circle.fill")
+                            .frame(maxWidth: .infinity)
+
+                    }
+                    .buttonStyle(.borderedProminent)
+
+                    Button {
+
+                        withAnimation(.spring()) {
+                            viewModel.addProtein()
+                        }
+
+                    } label: {
+
+                        Label("+10 г белка", systemImage: "bolt.fill")
+                            .frame(maxWidth: .infinity)
+
+                    }
+                    .buttonStyle(.borderedProminent)
+
+                    Button {
+
+                        withAnimation(.spring()) {
+                            viewModel.addWater()
+                        }
+
+                    } label: {
+
+                        Label("+250 мл воды", systemImage: "drop.fill")
+                            .frame(maxWidth: .infinity)
+
+                    }
+                    .buttonStyle(.borderedProminent)
+
+                }
+
+                VStack(alignment: .leading, spacing: 12) {
+
+                    Label("Рекомендация", systemImage: "lightbulb.fill")
+                        .font(.headline)
+
+                    Text(viewModel.recommendation)
+
+                }
+                .padding()
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(.ultraThinMaterial)
+                .clipShape(RoundedRectangle(cornerRadius: 24))
+
+            }
+
+            .padding()
+
+        }
+        .navigationTitle("Главная")
+
+    }
+
+}
+
+#Preview {
+
+    NavigationStack {
+
+        HomeView(viewModel: HomeViewModel())
+
+    }
+
+}
+--------------------------------
+      import SwiftUI
+
+struct ProfileView: View {
+
+    @State private var name = "Студент"
+    @State private var age = 18
+    @State private var height = 175
+    @State private var weight = 70
+    @State private var goal = "Поддержание"
+
+    let goals = [
+        "Похудение",
+        "Поддержание",
+        "Набор массы"
+    ]
+
+    var calories: Int {
+
+        switch goal {
+
+        case "Похудение":
+            return Int(Double(weight) * 24 * 0.85)
+
+        case "Набор массы":
+            return Int(Double(weight) * 24 * 1.20)
+
+        default:
+            return Int(Double(weight) * 24)
+
+        }
+
+    }
+
+    var body: some View {
+
+        NavigationStack {
+
+            Form {
+
+                Section("Пользователь") {
+
+                    TextField("Имя", text: $name)
+
+                    Stepper("Возраст: \(age)", value: $age, in: 10...90)
+
+                    Stepper("Рост: \(height) см", value: $height, in: 120...230)
+
+                    Stepper("Вес: \(weight) кг", value: $weight, in: 30...200)
+
+                }
+
+                Section("Цель") {
+
+                    Picker("Выберите цель", selection: $goal) {
+
+                        ForEach(goals, id: \.self) { goal in
+
+                            Text(goal)
+
+                        }
+
+                    }
+
+                }
+
+                Section("Результат") {
+
+                    HStack {
+
+                        Text("Норма калорий")
+
+                        Spacer()
+
+                        Text("\(calories) ккал")
+                            .bold()
+                            .foregroundStyle(.green)
+
+                    }
+
+                }
+
+            }
+            .navigationTitle("Профиль")
+
+        }
+
+    }
+
+}
+
+#Preview {
+
+    ProfileView()
+
+}
+------------------------------------
+          import SwiftUI
+
+struct StatisticsView: View {
+
+    @State private var calories = 1450
+    @State private var target = 2200
+
+    @State private var protein = 95.0
+    @State private var fat = 42.0
+    @State private var carbs = 180.0
+
+    var progress: Double {
+        Double(calories) / Double(target)
+    }
+
+    var body: some View {
+
+        ScrollView {
+
+            VStack(spacing: 20) {
+
+                Text("Статистика")
+                    .font(.largeTitle)
+                    .bold()
+
+                VStack(alignment: .leading, spacing: 12) {
+
+                    Text("Выполнение нормы")
+
+                    ProgressView(value: progress)
+                        .tint(.green)
+
+                    Text("\(Int(progress * 100))%")
+
+                }
+                .padding()
+                .background(.ultraThinMaterial)
+                .clipShape(RoundedRectangle(cornerRadius: 20))
+
+                StatRow(
+                    title: "Калории",
+                    value: "\(calories) ккал",
+                    color: .orange
+                )
+
+                StatRow(
+                    title: "Белки",
+                    value: "\(String(format: "%.0f", protein)) г",
+                    color: .green
+                )
+
+                StatRow(
+                    title: "Жиры",
+                    value: "\(String(format: "%.0f", fat)) г",
+                    color: .yellow
+                )
+
+                StatRow(
+                    title: "Углеводы",
+                    value: "\(String(format: "%.0f", carbs)) г",
+                    color: .blue
+                )
+
+            }
+            .padding()
+
+        }
+
+    }
+
+}
+
+struct StatRow: View {
+
+    let title: String
+    let value: String
+    let color: Color
+
+    var body: some View {
+
+        HStack {
+
+            Circle()
+                .fill(color)
+                .frame(width: 16, height: 16)
+
+            Text(title)
+
+            Spacer()
+
+            Text(value)
+                .bold()
+
+        }
+        .padding()
+        .background(.ultraThinMaterial)
+        .clipShape(RoundedRectangle(cornerRadius: 18))
+
+    }
+
+}
+
+#Preview {
+
+    StatisticsView()
+
+}
