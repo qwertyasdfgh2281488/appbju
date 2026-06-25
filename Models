@@ -1,0 +1,47 @@
+import Foundation
+
+struct Food: Identifiable {
+
+    let id = UUID()
+
+    var name: String
+
+    var calories: Int
+
+    var protein: Double
+
+    var fat: Double
+
+    var carbs: Double
+
+}
+-------------------
+import Foundation
+
+struct Meal: Identifiable {
+
+    let id = UUID()
+
+    var title: String
+
+    var foods: [Food]
+
+}
+--------------------
+import Foundation
+
+struct User {
+
+    var name: String = "Студент"
+
+    var age: Int = 18
+
+    var gender: String = "Мужской"
+
+    var weight: Double = 70
+
+    var height: Double = 175
+
+    var goal: String = "Поддержание"
+
+}
