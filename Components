@@ -1,0 +1,130 @@
+import SwiftUI
+
+struct CalorieRing: View {
+
+    let calories: Int
+    let target: Int
+
+    private var progress: Double {
+        min(Double(calories) / Double(target), 1.0)
+    }
+
+    var body: some View {
+
+        ZStack {
+
+            Circle()
+                .stroke(Color.gray.opacity(0.15), lineWidth: 22)
+
+            Circle()
+                .trim(from: 0, to: progress)
+                .stroke(
+                    AngularGradient(
+                        gradient: Gradient(colors: [
+                            .green,
+                            .mint,
+                            .blue
+                        ]),
+                        center: .center
+                    ),
+                    style: StrokeStyle(
+                        lineWidth: 22,
+                        lineCap: .round
+                    )
+                )
+                .rotationEffect(.degrees(-90))
+                .animation(.easeInOut(duration: 0.8), value: progress)
+
+            VStack(spacing: 6) {
+
+                Image(systemName: "flame.fill")
+                    .font(.largeTitle)
+                    .foregroundStyle(.orange)
+
+                Text("\(calories)")
+                    .font(.system(size: 44, weight: .bold))
+
+                Text("из \(target) ккал")
+                    .foregroundStyle(.secondary)
+
+                Text("\(Int(progress * 100))%")
+                    .font(.headline)
+                    .foregroundStyle(.green)
+
+            }
+
+        }
+        .frame(width: 250, height: 250)
+        .padding(.vertical)
+
+    }
+
+}
+
+#Preview {
+
+    CalorieRing(
+        calories: 1600,
+        target: 2200
+    )
+
+}
+---------------------
+import SwiftUI
+
+struct StatCard: View {
+
+    let title: String
+    let value: String
+    let icon: String
+    let color: Color
+
+    var body: some View {
+
+        VStack(alignment: .leading, spacing: 15) {
+
+            Image(systemName: icon)
+                .font(.system(size: 28))
+                .foregroundStyle(color)
+
+            Text(title)
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+
+            Text(value)
+                .font(.title2)
+                .fontWeight(.bold)
+
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding()
+        .background(.ultraThinMaterial)
+        .clipShape(RoundedRectangle(cornerRadius: 22))
+        .shadow(color: .black.opacity(0.08), radius: 8)
+
+    }
+
+}
+
+#Preview {
+
+    HStack {
+
+        StatCard(
+            title: "Белки",
+            value: "120 г",
+            icon: "bolt.fill",
+            color: .green
+        )
+
+        StatCard(
+            title: "Вода",
+            value: "2.1 л",
+            icon: "drop.fill",
+            color: .blue
+        )
+
+    }
+    .padding()
+
+}
